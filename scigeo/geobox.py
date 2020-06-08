@@ -56,3 +56,7 @@ def dms2ddm(deg, min_, sec):
     ddm = deg + min_ / 60
     
     return ddm
+
+def deg2km(lat):
+    # earth radius: 6371 km
+    return 6371 * np.cos(lat) * 2* np.pi / 360
