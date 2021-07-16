@@ -114,6 +114,20 @@ def points2grid(data, lons, lats, missing = -9999, method = 'nearest'):
 
     return arr, uniqueLons, uniqueLats
 
+def points2grid2(data, lons, lats, uniqueLons, uniqueLats, missing = -9999, method = 'nearest'):
+    """
+    user defined uniqueLons, uniqueLats
+    """
+    if uniqueLats[0] < uniqueLats[-1]: uniqueLats = np.flip(uniqueLats) 
+    # uniqueLats = uniqueLats[::-1] # lats shoud be descending from upper to bottom
+
+    if missing: data[np.where(data == missing)] = np.nan
+    points = list(zip(lons, lats))
+    grid_x, grid_y = np.meshgrid(uniqueLons, uniqueLats)
+    arr = griddata(points, data, (grid_x, grid_y), method = method)
+
+    return arr
+
 def points2points(data, lons_orig, lats_orig, lons_tar, lats_tar):
     """
     data, lons_orig, lats_orig, lons_tar, lats_tar are all vectors (1D array)
