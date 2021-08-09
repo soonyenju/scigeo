@@ -199,7 +199,7 @@ class VegIdx:
 
     # EVI
     # --------------------------------------------------------------------------------------------------------------
-    # EVI = G * ((NIR - R) / (NIR + C1 * R – C2 * B + L))
+    # EVI = G * ((NIR - R) / (NIR + C1 * R - C2 * B + L))
     @staticmethod
     def modis_evi_2band(b1, b2):
         return 2.5 * ((b2 - b1) / (b2 + 2.4 * b1 + 1))
@@ -210,12 +210,12 @@ class VegIdx:
 
     @staticmethod
     def landsat7_evi(b1, b3, b4):
-        return 2.5 * ((b4 – b3) / (b4 + 6 * b3 – 7.5 * b1 + 1))
+        return 2.5 * ((b4 - b3) / (b4 + 6 * b3 - 7.5 * b1 + 1))
 
     @staticmethod
     def landsat8_evi(b2, b4, b5):
-        return 2.5 * ((b5 – b4) / (b5 + 6 * b4 – 7.5 * b2 + 1))
+        return 2.5 * ((b5 - b4) / (b5 + 6 * b4 - 7.5 * b2 + 1))
 
     @staticmethod
     def sentinel2_evi(b2, b4, b8):
-        return 2.5 * ((b8 – b4) / (b8 + 6 * b4 – 7.5 * b2 + 1))
+        return 2.5 * ((b8 - b4) / (b8 + 6 * b4 - 7.5 * b2 + 1))
