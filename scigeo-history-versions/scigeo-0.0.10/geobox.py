@@ -154,7 +154,7 @@ def get_stats(arr, n = 5):
     ticks = [min_ + i * interval for i in range(n)]
     return ticks
 
-def map2darr(arr, uniqueLons, uniqueLats, unit = "", cmap = "viridis", figsize = [6, 4], vmin = None, vmax = None):
+def map2darr(arr, uniqueLons, uniqueLats, unit = "", cmap = "viridis", figsize = [6, 4]):
     ticklabels = [latex_float(f) for f in get_stats(arr)]
 
     arr = 255 * (arr - np.nanmin(arr)) / (np.nanmax(arr) - np.nanmin(arr))
@@ -164,7 +164,7 @@ def map2darr(arr, uniqueLons, uniqueLats, unit = "", cmap = "viridis", figsize =
     fig, ax = plt.subplots(figsize = figsize)
     divider = make_axes_locatable(ax)
     cax = divider.append_axes('right', size='5%', pad=0.05)
-    im = ax.imshow(arr, cmap = cmap, extent = [uniqueLons.min(), uniqueLons.max(), uniqueLats.min(), uniqueLats.max()], vmin = vmin, vmax = vmax)
+    im = ax.imshow(arr, cmap = cmap, extent = [uniqueLons.min(), uniqueLons.max(), uniqueLats.min(), uniqueLats.max()])
     # Add colorbar, make sure to specify tick locations to match desired ticklabels
     cbar = fig.colorbar(im, cax = cax, orientation = 'vertical', ticks = ticks)
     cbar.ax.set_yticklabels(ticklabels)  # vertically oriented colorbar
