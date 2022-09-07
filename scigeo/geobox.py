@@ -249,3 +249,65 @@ class VegIdx:
     @staticmethod
     def sentinel2_evi(b2, b4, b8):
         return 2.5 * ((b8 - b4) / (b8 + 6 * b4 - 7.5 * b2 + 1))
+
+
+class Polygon2Raster:
+    # # Example:
+    # out_tif = root_proj.joinpath('china-province-raster-country.tif')
+    # in_shp = root.joinpath('country.shp')
+    # pixel_size = 0.25
+    # field = 'index' # NAME_1
+    # Polygon2Raster_country().polygon_to_raster(in_shp,out_tif,pixel_size,field)
+    """
+    date: 2021/7/8
+    author: 甲戌_Tr
+    email: liu_xxxi@163.com
+    """
+    def polygon_to_raster(self,shp,raster,pixel,field,code=4326):
+        '''
+        矢量转栅格
+        :param shp: 输入矢量全路径，字符串，无默认值
+        :param raster: 输出栅格全路径，字符串，无默认值
+        :param pixel: 像元大小，与矢量坐标系相关
+        :param field: 栅格像元值字段
+        :param Code: 输出坐标系代码，默认为4326
+        :return: None
+        '''
+
+        # 判断字段是否存在
+        shapefile = gpd.read_file(shp)
+        if field.upper() == 'INDEX':
+            shapefile[field] = np.arange(len(shapefile)) + 1
+        if not field in shapefile.columns:
+            raise Exception ('输出字段不存在')
+        # 判断数据类型
+        f_type = shapefile.dtypes.get(field)
+        if 'int' in str(f_type):
+            shapefile[field] = shapefile[field].astype('int16')
+            dtype = 'int16'
+        elif 'float' in str(f_type):
+            shapefile[field] = shapefile[field].astype('float32')
+            dtype = 'float32'
+        else:
+            raise Exception ('输入字段数据类型为{}，无法进行栅格化操作'.format(f_type))
+
+        bound = shapefile.bounds
+        width = int((bound.get('maxx').max()-bound.get('minx').min())/pixel)
+        height = int((bound.get('maxy').max()-bound.get('miny').min())/pixel)
+        transform = rio.Affine(pixel, 0.0, bound.get('minx').min(),
+               0.0, -pixel, bound.get('maxy').max())
+
+        meta = {'driver': 'GTiff',
+                'dtype': dtype,
+                'nodata': 0,
+                'width': width,
+                'height': height,
+                'count': 1,
+                'crs': rio.crs.CRS.from_epsg(code),
+                'transform': transform}
+
+        with rio.open(raster, 'w+', **meta) as out:
+            out_arr = out.read(1)
+            shapes = ((geom,value) for geom, value in zip(shapefile.get('geometry'), shapefile.get(field)))
+            burned = rio.features.rasterize(shapes=shapes, fill=0, out=out_arr, transform=out.transform)
+            out.write_band(1, burned)
