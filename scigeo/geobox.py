@@ -5,6 +5,7 @@ from scipy.interpolate import griddata
 from scipy.interpolate import Rbf, LinearNDInterpolator, interp2d
 from scipy.spatial import cKDTree as KDTree
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import rasterio as rio
 
 class IDW(object):
     """ 
@@ -175,6 +176,34 @@ def map2darr(arr, uniqueLons, uniqueLats, unit = "", cmap = "viridis", figsize =
     ax.set_ylabel("Latitude")
 
     return fig, ax
+
+# from rasterio import transform
+# from rasterio.warp import calculate_default_transform, reproject, Resampling
+
+def reproj_tif(p, p_out, dst_crs = 'EPSG:4326'):
+    with rio.open(p) as src:
+        transform, width, height = rio.warp.calculate_default_transform(
+            src.crs, dst_crs, src.width, src.height, *src.bounds)
+        kwargs = src.meta.copy()
+        kwargs.update({
+            'crs': dst_crs,
+            'transform': transform,
+            'width': width,
+            'height': height
+        })
+
+        with rio.open(p_out, 'w', **kwargs) as dst:
+            for i in range(1, src.count + 1):
+                rio.warp.reproject(
+                    source=rio.band(src, i),
+                    destination=rio.band(dst, i),
+                    src_transform=src.transform,
+                    src_crs=src.crs,
+                    dst_transform=transform,
+                    dst_crs=dst_crs,
+                    resampling=rio.warp.Resampling.nearest)
+
+# p_out = p.parent.joinpath('reproj.tif')
 
 class VegIdx:
     def __init__(self):
