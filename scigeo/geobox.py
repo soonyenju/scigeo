@@ -1,4 +1,5 @@
 import numpy as np
+import rioxarray
 import rasterio as rio
 import geopandas as gpd
 import matplotlib.pyplot as plt
@@ -311,3 +312,16 @@ class Polygon2Raster:
             shapes = ((geom,value) for geom, value in zip(shapefile.get('geometry'), shapefile.get(field)))
             burned = rio.features.rasterize(shapes=shapes, fill=0, out=out_arr, transform=out.transform)
             out.write_band(1, burned)
+
+
+def tif2df(p, dim):
+    xds = rioxarray.open_rasterio(p)
+    xds = xds.mean(dim = dim)
+    xds = xds.to_pandas()
+    return xds
+
+def get_zonal_stats(shp, arr2D, minlon, minlat, maxlon, maxlat, width, height):
+    from rasterstats import zonal_stats
+    affine = rio.transform.from_bounds(minlon, minlat, maxlon, maxlat, width, height)
+    stat_vals = zonal_stats(shp, arr2D, affine=affine, stats=['min', 'max', 'mean', 'median', 'majority', 'sum'])[0]
+    return stat_vals
