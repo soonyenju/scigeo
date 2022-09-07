@@ -1,11 +1,12 @@
 import numpy as np
+import rasterio as rio
+import geopandas as gpd
 import matplotlib.pyplot as plt
 from scipy import ndimage
 from scipy.interpolate import griddata
 from scipy.interpolate import Rbf, LinearNDInterpolator, interp2d
 from scipy.spatial import cKDTree as KDTree
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import rasterio as rio
 
 class IDW(object):
     """ 
