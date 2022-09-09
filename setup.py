@@ -13,7 +13,7 @@ from setuptools import setup, find_packages
 
 setup(
 	name = "scigeo",
-	version = "0.0.12",
+	version = "0.0.13",
 	keywords = ("easy geo warpper"),
 	description = "read/dump/process geo data",
 	long_description = "coming soon",
