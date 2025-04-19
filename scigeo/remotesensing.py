@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 bands_table = pd.DataFrame.from_dict(
     {
