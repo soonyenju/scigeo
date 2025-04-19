@@ -104,23 +104,12 @@ def grid2points2(arr, lons, lats, lon_pnts, lat_pnts, missing = -9999, method = 
     data = griddata((latlat.ravel(), lonlon.ravel()), arr.ravel(), (lat_pnts, lon_pnts), method = method)
     return data
 
-def points2grid(data, lons, lats, missing = -9999, method = 'nearest'):
-    uniqueLats = np.unique(lats)
-    uniqueLons = np.unique(lons)
-    if uniqueLats[0] < uniqueLats[-1]: uniqueLats = np.flip(uniqueLats) 
-    # uniqueLats = uniqueLats[::-1] # lats shoud be descending from upper to bottom
-
-    if missing: data[np.where(data == missing)] = np.nan
-    points = list(zip(lons, lats))
-    grid_x, grid_y = np.meshgrid(uniqueLons, uniqueLats)
-    arr = griddata(points, data, (grid_x, grid_y), method = method)
-
-    return arr, uniqueLons, uniqueLats
-
-def points2grid2(data, lons, lats, uniqueLons, uniqueLats, missing = -9999, method = 'nearest'):
+def points2grid(data, lons, lats, uniqueLons = None, uniqueLats = None, missing = -9999, method = 'nearest'):
     """
     user defined uniqueLons, uniqueLats
     """
+    uniqueLats = uniqueLats or np.unique(lats)
+    uniqueLons = uniqueLons or np.unique(lons)
     if uniqueLats[0] < uniqueLats[-1]: uniqueLats = np.flip(uniqueLats) 
     # uniqueLats = uniqueLats[::-1] # lats shoud be descending from upper to bottom
 
