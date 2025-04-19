@@ -1,2 +1,2 @@
 # coding: utf-8
-__all__ = ["geobox", "geoface"]
+__all__ = ["geobox", "geoface", "remotesensing"]
