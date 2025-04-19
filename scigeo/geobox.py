@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import rioxarray
 import rasterio as rio
 import geopandas as gpd
@@ -6,45 +7,46 @@ import matplotlib.pyplot as plt
 from scipy import ndimage
 from scipy.interpolate import griddata
 from scipy.interpolate import Rbf, LinearNDInterpolator, interp2d
-from scipy.spatial import cKDTree as KDTree
+from scipy.spatial import cKDTree
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-class IDW(object):
-    """ 
-    # https://mail.python.org/pipermail/scipy-user/2010-June/025920.html
-    # https://github.com/soonyenju/pysy/blob/master/pysy/scigeo.py
-    inverse-distance-weighted interpolation using KDTree:
-    invdisttree = Invdisttree(X, z)  
-    -- points, values
-    interpol = invdisttree(q, k=6, eps=0)
-    -- interpolate z from the 6 points nearest each q;
-        q may be one point, or a batch of points
 
+def idw_interp(df_src, df_tar, val_col, lon = 'lon', lat = 'lat', k = 9, power = 2):
     """
-    def __init__(self, X, z, leafsize = 10):
-        super()
-        self.tree = KDTree(X, leafsize=leafsize)  # build the tree
-        self.z = z
+    Perform Inverse Distance Weighting (IDW) interpolation.
+    
+    Parameters:
+        df_src (pd.DataFrame): Source data with columns ['lon', 'lat', val_col]
+        df_tar (pd.DataFrame): Target points with columns ['lon', 'lat']
+        val_col (str): Name of the value column in df_src to interpolate
+        k (int): Number of nearest neighbors
+        power (float): Power parameter for IDW (usually 1 or 2)
 
-    def __call__(self, q, k = 8, eps = 0):
-        # q is coor pairs like [[lon1, lat1], [lon2, lat2], [lon3, lat3]]
-        # k nearest neighbours of each query point --
-        # format q if only 1d coor pair passed like [lon1, lat1]
-        if not isinstance(q, np.ndarray):
-            q = np.array(q)
-        if q.ndim == 1:
-            q = q[np.newaxis, :]
+    Returns:
+        pd.DataFrame: df_tar with an added column of interpolated values
+    """
+    coords_a = df_src[[lon, lat]].values
+    coords_b = df_tar[[lon, lat]].values
+    values_a = df_src[val_col].values
 
-        self.distances, self.ix = self.tree.query(q, k = k,eps = eps)
-        interpol = []  # np.zeros((len(self.distances),) +np.shape(z[0]))
-        for dist, ix in zip(self.distances, self.ix):
-            if dist[0] > 1e-10:
-                w = 1 / dist
-                wz = np.dot(w, self.z[ix]) / np.sum(w)  # weightz s by 1/dist
-            else:
-                wz = self.z[ix[0]]
-            interpol.append(wz)
-        return interpol
+    tree = cKDTree(coords_a)
+    distances, indices = tree.query(coords_b, k=k)
+    
+    # Handle the case when k=1 (ensure 2D arrays)
+    if k == 1:
+        distances = distances[:, np.newaxis]
+        indices = indices[:, np.newaxis]
+
+    # Avoid division by zero
+    distances = np.maximum(distances, 1e-10)
+    weights = 1 / distances**power
+    weights /= weights.sum(axis=1)[:, None]
+
+    interpolated_values = np.sum(values_a[indices] * weights, axis=1)
+
+    dfo = df_tar.copy()
+    dfo[val_col] = interpolated_values
+    return dfo
 
 def gen_buffer(lon, lat, step, shape = "rectangle"):
     if shape == "rectangle":
@@ -193,7 +195,6 @@ def reproj_tif(p, p_out, dst_crs = 'EPSG:4326'):
                     dst_transform=transform,
                     dst_crs=dst_crs,
                     resampling=rio.warp.Resampling.nearest)
-
 
 def tif2df(p, dim):
     xds = rioxarray.open_rasterio(p)
