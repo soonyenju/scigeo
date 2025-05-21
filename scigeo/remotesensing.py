@@ -59,3 +59,18 @@ def deg2m(longitude, latitude, scale_lon, scale_lat):
     coef_mat = coef_mat * scale_lon * scale_lat
     return coef_mat
 
+def ETM2OLI(data, band):
+    # Convert ETM+ reflectance to OLI
+    # See Google Earth Engine page: https://developers.google.com/earth-engine/tutorials/community/landsat-etm-to-oli-harmonization
+    ETM_TO_OLI_COEFFS = {
+        'B1': (0.8474, 0.0003),  # ETM+ B1 → OLI B2 ('blue')
+        'B2': (0.8483, 0.0088),  # ETM+ B2 → OLI B3 ('green')
+        'B3': (0.9047, 0.0061),  # ETM+ B3 → OLI B4 ('red')
+        'B4': (0.8462, 0.0412),  # ETM+ B4 → OLI B5 ('nir')
+        'B5': (0.8937, 0.0254),  # ETM+ B5 → OLI B6 ('swir1')
+        'B7': (0.9071, 0.0172),  # ETM+ B7 → OLI B7 ('swir2')
+    }
+
+    a = ETM_TO_OLI_COEFFS[band][0]
+    b = ETM_TO_OLI_COEFFS[band][1]
+    return data * a + b
