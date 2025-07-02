@@ -33,6 +33,10 @@ def get_EVI3band(r, nir, b):
     evi = 2.5 * ((nir - r) / (nir + 6 * r - 7.5 * b + 1))
     return evi
 
+def get_NDWI(green, nir):
+    ndwi = (green - nir) / (green + nir)
+    return ndwi
+
 
 def get_MODIS_IGBPcode():
     '''
