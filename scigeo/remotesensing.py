@@ -38,13 +38,55 @@ def get_NDWI(green, nir):
     return ndwi
 
 
-def get_MODIS_IGBPcode():
+def get_MODIS_IGBPcode(number_first = False):
     '''
     url: https://developers.google.com/earth-engine/datasets/catalog/MODIS_061_MCD12Q1 
     '''
     MODIS_IGBP_codes = ['ENF', 'EBF', 'DNF', 'DBF', 'MF', 'CSH', 'OSH', 'WSA', 'SAV', 'GRA', 'WET', 'CRO', 'URB', 'CNV', 'SNO', 'BSV', 'WAB']
     MODIS_IGBP_dict = dict(zip(MODIS_IGBP_codes, np.arange(len(MODIS_IGBP_codes)) + 1))
-    return MODIS_IGBP_dict
+    if number_first:
+        return {v: k for k, v in esa_class.items()}
+    else:
+        return MODIS_IGBP_dict
+
+def get_DynamicWorld_code(number_first = False):
+    google_class = {
+        0: 'water',
+        1: 'trees',
+        2: 'grass',
+        3: 'flooded_vegetation',
+        4: 'crops',
+        5: 'shrub_and_scrub',
+        6: 'built',
+        7: 'bare',
+        8: 'snow_and_ice'
+    }
+    if number_first:
+        return google_class
+    else:
+        return {v: k for k, v in google_class.items()}
+
+
+def get_ESAWorldCover_code(number_first = False):
+    # https://developers.google.com/earth-engine/datasets/catalog/ESA_WorldCover_v100
+
+    esa_class = {
+        10: 'trees',
+        20: 'shrub_and_scrub',
+        30: 'grass',
+        40: 'crops',
+        50: 'built',
+        60: 'bare',
+        70: 'snow_and_ice',
+        80: 'water',
+        90: 'flooded_vegetation',
+        95: 'mangroves',
+        100: 'moss_and_lichen'
+    }
+    if number_first:
+        return esa_class
+    else:
+        return {v: k for k, v in esa_class.items()}
 
 def convert_gCm2d1_PgCyr_025deg():
     '''
