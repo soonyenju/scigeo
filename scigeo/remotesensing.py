@@ -16,8 +16,13 @@ def get_NDVI(r, nir):
     ndvi = (nir - r) / (nir + r)
     return ndvi
 
-def get_NIRv(ndvi, nir):
-    nirv = ndvi * nir
+def get_NIRv(r_ndvi, nir, ndvi_in = True):
+    if ndvi_in:
+        ndvi = r_ndvi
+        nirv = ndvi * nir
+    else:
+        r = r_ndvi
+        nirv = (nir - r) / (nir + r) * nir
     return nirv
 
 def get_kNDVI(ndvi):
